@@ -422,7 +422,7 @@ func trapWait(dbp *DebuggedProcess, pid int, options int) (int, *syscall.WaitSta
 func handleBreakPoint(dbp *DebuggedProcess, pid int) error {
 	thread := dbp.Threads[pid]
 	if pid != dbp.CurrentThread.Id {
-		fmt.Printf("thread context changed from %d to %d\n", dbp.CurrentThread.Id, pid)
+		//fmt.Printf("thread context changed from %d to %d\n", dbp.CurrentThread.Id, pid)
 		dbp.CurrentThread = thread
 	}
 
@@ -493,7 +493,7 @@ func addNewThread(dbp *DebuggedProcess, pid int) error {
 	if err != nil {
 		return fmt.Errorf("could not get event message: %s", err)
 	}
-	fmt.Println("new thread spawned", msg)
+	//fmt.Println("new thread spawned", msg)
 
 	_, err = dbp.addThread(int(msg))
 	if err != nil {
