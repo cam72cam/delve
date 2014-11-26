@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 	"syscall"
 
 	"github.com/derekparker/delve/dwarf/frame"
@@ -135,8 +136,23 @@ func (thread *ThreadContext) Continue() error {
 	return syscall.PtraceCont(thread.Id, 0)
 }
 
+func (thread *ThreadContext) canMove() bool {
+	pc, err := thread.CurrentPC()
+	if err != nil {
+		return true
+	}
+	f, _, fn := thread.Process.GoSymTable.PCToLine(pc)
+	if fn == nil {
+		return true
+	}
+	return !strings.Contains(f, "pkg/runtime")
+}
+
 // Steps through thread of execution.
 func (thread *ThreadContext) Step() (err error) {
+	if !thread.canMove() {
+		return nil
+	}
 	regs, err := thread.Registers()
 	if err != nil {
 		return err
@@ -178,6 +194,9 @@ func (thread *ThreadContext) Step() (err error) {
 
 // Steps through thread of execution.
 func (thread *ThreadContext) Next() (err error) {
+	if !thread.canMove() {
+		return nil
+	}
 	pc, err := thread.CurrentPC()
 	if err != nil {
 		return err
